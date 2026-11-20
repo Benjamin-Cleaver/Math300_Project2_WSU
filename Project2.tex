@@ -1,0 +1,185 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{biblatex}
+\addbibresource{ProjectReferences.bib}
+
+\title{Project 2: Nonlinear ODEs}
+\author{Benjamin Cleaver}
+\date{\today}
+\begin{document}
+\maketitle
+
+\textbf{AI policy: }
+No AI was used in the creation of this project. Auto-fill suggestions were used for things that were repetitive and I was going to type them anyways. \\
+
+
+\textbf{Background Information: } Nonlinear ordinary differential equations (ODEs) are used to show changes due to the passage of time.
+Some examples of systems that use ODEs are:
+\begin{center}
+Swinging pendulums, Predator-prey populations, chemical oscillators.
+\end{center}
+
+\noindent A system of first-order ODEs will have the form:
+
+\begin{center}
+    $\frac{dx}{dt}=f(x,t), \quad x(0)=x_0$
+\end{center}
+Where x(t) is the state of the system at time t. \\
+
+\noindent In this project, the two systems that I will be demonstrating are the Lorenz System and the Van der Pol oscillator \\
+
+\noindent The Van der Pol oscillator is a Two-Dimension system, while the Lorenz system is a Three-Dimensional system. \\
+
+\section{Lorenz system: } \cite{LorenzSystem}
+
+\subsection{Write the first-order ODEs}
+\noindent The Lorenz system can be written as the first-order ODE:
+
+\begin{center}
+    $x'= \sigma(y-x), \quad y'=x(\rho-z)-y,\quad z'=xy-\beta z$
+\end{center}
+\noindent With the solutions $\sigma=10, p=28, and \,\beta=8/3$ \\
+
+\noindent In this system:
+\begin{center}
+    x represents the rate of convection.\\
+    y represents the temperature difference between rising and descending air\\
+    z represents the deviation of the temperature from the average.\\
+    $\sigma$ represents the fluid viscosity/thermal diffusivity (Prandtl number)\\
+    $\rho$ is the Rayleigh number which drives convection\\
+    $\beta$ is a system parameter which relates to the geometry of the system.
+\end{center}
+
+\noindent Essentially, it describes the behavior of convection currents in the atmosphere. \\
+
+\subsection{Write the right-hand side and solve with solve\_ivp}
+
+\noindent Using this python code:
+\begin{center}
+    s=10.0 ; p=28.0 ; b=8.0/3.0 \\
+sol=solve\_ivp(f,(0,50), [.01,.01,.01],t\_eval=tt)
+\end{center}
+\noindent This gives us the right-hand side (f) on an interval (0,50) in the provided list of starting values [.01,.01,.01]
+
+\subsection{Plot solutions against time for a few initial states and parameter values}
+
+\begin{center}
+    fig,ax=plt.subplots(figsize=(10,6)) \\
+plt.axhline(x2, color='black',lw=1,linestyle='--',label=f"Steady state: x={x2:.2f}")
+plt.axhline(-x2, color='black',lw=1,linestyle='--',label=f"Steady state: x={-x2:.2f}") \\
+
+ax.plot(sol.t,sol.y[0],'-',color='purple',lw=1,label='Trajectory') \\
+
+ax.set\_xlabel('t'); ax.set\_ylabel('x'); ax.set\_title('Lorenz System') \\
+ax.legend() \\
+plt.show()
+\end{center}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{LorenzSystem.png}
+    \caption{Lorenz System}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Plot error at a fixed final time against the tolerance rtol on a log-log scale}
+
+\begin{center}
+    print("rtol      max error   calls of f") \\
+for rtol in [1e-3, 1e-6, 1e-9]: \\
+    sol = solve\_ivp(f, (0, 50), [.01,.01,.01], t\_eval=tt, rtol=rtol, atol=1e-12) \\
+    err = np.max(np.abs(sol.y[0] - y\_exact(tt))) \\
+    print(f"{rtol:8.0e}   {err:9.1e}   {sol.nfev:5d}")
+\end{center}
+
+\noindent When $|y|$ is large, the rtol controls the accuracy; when $|y|$ is small, atol does. A smaller tolerance results in smaller errors.
+\begin{center}
+\noindent rtol    \quad  max error  \quad calls of f \\
+1e-03  \quad   1.9e+01  \quad  4634 \\
+1e-06  \quad   1.9e+01  \quad 13520 \\
+1e-09  \quad   1.9e+01 \quad  49100
+\end{center}
+
+\section{Van der Pol oscillator} \cite{VanDerPol}
+
+\subsection{Write the first-order ODEs}
+\noindent The Van der Pol Oscillator system can be written as the first-order ODE:
+
+\begin{center}
+    tt=np.linspace(0,50,400)\\
+u=1.0\\
+def f(t, xy): \\
+    x,y=xy \\
+    return [y, u*(1-x**2)*y-x] \\
+\end{center}
+
+In this system:
+\begin{center}
+    $\mu$ represents the dampening.
+\end{center}
+
+\subsection{Write the right-hand side and solve with solve\_ivp}
+
+Using this python code:
+
+\begin{center}
+    sol = solve\_ivp(f,(0,50),[1,0], t\_eval=tt)
+\end{center}
+
+We can find the right-hand side (f) on an interval (0,50) in the provided list of starting values [1,0]
+
+\subsection{Plot solutions against time for a few initial states and parameter values}
+
+\begin{center}
+    fig,ax=plt.subplots(figsize=(10,6))\\
+
+ax.plot(sol.t, sol.y[0], color='purple', lw=1, label='x(t)')\\
+
+ax.set\_xlabel('t')\\
+ax.set\_ylabel('x')\\
+ax.set\_title('Van der Pol Oscillator')\\
+ax.legend()\\
+
+plt.show()\\
+\end{center}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{VanDerPol.png}
+    \caption{Van der Pol Oscillator}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Plot error at a fixed final time against the tolerance rtol on a log-log scale}
+
+\begin{center}
+    print("   rtol      max error   calls of f")
+for rtol in [1e-3, 1e-6, 1e-9]:\\
+    sol\_exact = solve\_ivp(f, (0, 50), [1,0], t\_eval=tt, rtol=rtol, atol=1e-12)\\
+    err = np.max(np.abs(sol.y[0] - sol\_exact.y[0]))\\
+    print(f"{rtol:8.0e}   {err:9.1e}   {sol.nfev:5d}")
+\end{center}
+
+\noindent When $|y|$ is large, the rtol controls the accuracy; when $|y|$ is small, atol does. A smaller tolerance results in smaller errors.
+
+\begin{center}
+rtol  \quad    max error  \quad calls of f \\
+   1e-03   \quad  2.2e-02  \quad  1106 \\
+   1e-06 \quad 2.7e-02  \quad  1106 \\
+   1e-09  \quad  2.7e-02  \quad  1106
+\end{center}
+
+\section{Conclusion:}
+
+\subsection{References:}
+
+\printbibliography
+
+
+
+\end{document}
